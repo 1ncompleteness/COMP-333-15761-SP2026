@@ -13,9 +13,19 @@ public class Nil implements ImmutableList {
         return 0;
     } // hashCode
 
-    public int length() { return 0; }
-    public int sum() { return 0; }
-    public ImmutableList append(final ImmutableList other) { return other; }
-    public boolean contains(final int value) { return false; }
+    public int length() {
+        return 0;
+    }
+
+    public int sum() {
+        return 0;
+    }
+    public ImmutableList append(final ImmutableList other) {
+        return other;
+    }
+
+    public boolean contains(final int value) {
+        return false;
+    }
 } // Nil
     
