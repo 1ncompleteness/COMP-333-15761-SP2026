@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Object-Oriented Programming In JavaScript # | comp333-spring26</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Object-Oriented Programming In JavaScript #" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Course website for COMP 333 for Spring’26 Semester" />
+<meta property="og:description" content="Course website for COMP 333 for Spring’26 Semester" />
+<link rel="canonical" href="https://kyledewey.github.io/comp333-spring26/lecture/javascript/objects_in_javascript.html" />
+<meta property="og:url" content="https://kyledewey.github.io/comp333-spring26/lecture/javascript/objects_in_javascript.html" />
+<meta property="og:site_name" content="comp333-spring26" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Object-Oriented Programming In JavaScript #" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Course website for COMP 333 for Spring’26 Semester","headline":"Object-Oriented Programming In JavaScript #","url":"https://kyledewey.github.io/comp333-spring26/lecture/javascript/objects_in_javascript.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+    <link rel="stylesheet" href="/comp333-spring26/assets/css/style.css?v=cade1d10511e6c5ef178e5b698d6dd96da836623">
+    <!-- start custom head snippets, customize with your own _includes/head-custom.html file -->
+
+<!-- Setup Google Analytics -->
+
+
+
+<!-- You can set your favicon here -->
+<!-- link rel="shortcut icon" type="image/x-icon" href="/comp333-spring26/favicon.ico" -->
+
+<!-- end custom head snippets -->
+
+  </head>
+  <body>
+    <div class="container-lg px-3 my-5 markdown-body">
+      
+      <h1><a href="https://kyledewey.github.io/comp333-spring26/">comp333-spring26</a></h1>
+      
+
+      <h1 id="object-oriented-programming-in-javascript">Object-Oriented Programming In JavaScript</h1>
+
+<p>JavaScript, like Java and C++, is an object-oriented (OO) language.
+Like Java and C++, JavaScript has:</p>
+
+<ul>
+  <li>Objects (complete with their own state)</li>
+  <li>Constructors (which create objects)</li>
+  <li>Methods (which execute on an object)</li>
+  <li>Inheritance (allowing objects to get methods from another source)</li>
+</ul>
+
+<p>However, unlike Java and C++, JavaScript notably is <em>not</em> a class-based OO language.
+Instead, it is a <em>prototype-based</em> OO language.
+In one sentence, this means that objects inherit directly from <em>other objects</em>, as opposed to classes inheriting from classes.
+This has profound impact on both JavaScript’s design and how it can be used:</p>
+
+<ul>
+  <li>There is no need to have classes, or most of the machinery associated with classes built-in to the language.
+As a result, the language itself is much simpler than a typical class-based OO language, at least in terms of the sheer number of features the programmer needs to be aware of.</li>
+  <li>Classes fundamentally fix what kinds of objects can be created at compile time.
+Typically, in class-based languages, you can’t dynamically create a whole new class at runtime (or at least it’s difficult to do so).
+However, JavaScript makes it easy to make whole new kinds of objects at runtime, for better or for worse.</li>
+  <li>Inheriting from an object is as simple as storing a reference to another object.
+This reference can be updated dynamically.
+As such, not only can we dynamically determine where an object inherits from, we can dynamically change the object it inherits from (again, for better or for worse).</li>
+</ul>
+
+<p>The rest of this guide goes over some of these key concepts in JavaScript.
+It is not intended to be an exhaustive guide to everything you can do with this, but rather a brief introduction to how objects work in JavaScript.</p>
+
+<h3 id="upfront-caveat-the-class-reserved-word">Upfront Caveat: the <code class="language-plaintext highlighter-rouge">class</code> Reserved Word</h3>
+
+<p>You may have seen the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes"><code class="language-plaintext highlighter-rouge">class</code> reservered word in JavaScript</a>, which seems to contradict everything you just read.
+However, <code class="language-plaintext highlighter-rouge">class</code> is a bit of a misnomer.
+<code class="language-plaintext highlighter-rouge">class</code> merely sets up the usual prototype-based inheritance to behave according to what you might expect from class-based inheritance.
+That is, is basically just translates your class-like code into prototype-based code, transparently.
+Prototype-based inheritance is strictly more flexible than class-based inheritance, which is why this is possible to do to begin with: given prototype-based inheritance, we can implement class-based inheritance, but not the other way around.</p>
+
+<h3 id="code-in-this-guide">Code in this Guide</h3>
+
+<p>All code in this guide is run with <a href="https://nodejs.org/en/"><code class="language-plaintext highlighter-rouge">node</code></a>.
+Code input into <code class="language-plaintext highlighter-rouge">node</code> starts with the <code class="language-plaintext highlighter-rouge">&gt;</code> character.
+The output of <code class="language-plaintext highlighter-rouge">node</code> immediately follows.
+For example:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;</span> <span class="kd">let</span> <span class="nx">x</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span>
+<span class="kc">undefined</span>
+<span class="o">&gt;</span> <span class="nx">x</span>
+<span class="mi">3</span>
+</code></pre></div></div>
+
+<p>The above code introduces the new variable <code class="language-plaintext highlighter-rouge">x</code>, and initializes it to hold the result of <code class="language-plaintext highlighter-rouge">1 + 2</code>.
+This was typed directly into <code class="language-plaintext highlighter-rouge">node</code>.
+Node always responds with an answer, even if no answer makes sense.
+In case no answer makes sense, <code class="language-plaintext highlighter-rouge">node</code> responds with <code class="language-plaintext highlighter-rouge">undefined</code>, as seen above.
+That is, declaring and initializing a variable does not produce any output, so we see <code class="language-plaintext highlighter-rouge">undefined</code> as a sort of placeholder.
+After that, the expression <code class="language-plaintext highlighter-rouge">x</code> is evaluated, with the line <code class="language-plaintext highlighter-rouge">&gt; x</code>.
+Since <code class="language-plaintext highlighter-rouge">x</code> was previously declared, node gives us the current value of <code class="language-plaintext highlighter-rouge">x</code>, namely <code class="language-plaintext highlighter-rouge">3</code>.</p>
+
+<h2 id="objects-in-javascript">Objects in JavaScript</h2>
+
+<p>First, let’s talk about objects in JavaScript.
+JavaScript objects are implemented as a sort of built-in data structure, representing a map / dictionary / hash table.
+It’s basically just something that associates keys (represented as strings) to values, where the values can be any data you want.
+For example, consider the following code:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;</span> <span class="kd">let</span> <span class="nx">obj</span> <span class="o">=</span> <span class="p">{</span> <span class="dl">'</span><span class="s1">foo</span><span class="dl">'</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="dl">'</span><span class="s1">bar</span><span class="dl">'</span><span class="p">:</span> <span class="kc">true</span> <span class="p">}</span>
+<span class="kc">undefined</span>
+<span class="o">&gt;</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">foo</span>
+<span class="mi">1</span>
+<span class="o">&gt;</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">bar</span>
+<span class="kc">true</span>
+</code></pre></div></div>
+
+<p>The notation with the <code class="language-plaintext highlighter-rouge">{ ... }</code> is used to create an <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Working_with_Objects">object literal</a>.
+This basically creates a brand new object in-place.
+In the above code, we make an object with the <em>fields</em> <code class="language-plaintext highlighter-rouge">foo</code> and <code class="language-plaintext highlighter-rouge">bar</code>, which are both strings.
+The word “field” is usually used to refer to individual keys, and sometimes the key/value pair, in an object.
+Strings in JavaScript can be denoted with either single quotes (<code class="language-plaintext highlighter-rouge">'foo'</code>) or double quotes (<code class="language-plaintext highlighter-rouge">"foo"</code>).
+The <code class="language-plaintext highlighter-rouge">foo</code> field is initialized with the integer <code class="language-plaintext highlighter-rouge">1</code>, and the <code class="language-plaintext highlighter-rouge">bar</code> field is initialized with the boolean value <code class="language-plaintext highlighter-rouge">true</code>.
+The subsequent <code class="language-plaintext highlighter-rouge">undefined</code> is because variable declaration by itself doesn’t produce any useful value, so <code class="language-plaintext highlighter-rouge">node</code> gives us back the dummy value <code class="language-plaintext highlighter-rouge">undefined</code>.
+Afterwards, we access the <code class="language-plaintext highlighter-rouge">foo</code> and <code class="language-plaintext highlighter-rouge">bar</code> fields of <code class="language-plaintext highlighter-rouge">obj</code>, which intentionally uses the usual dot (<code class="language-plaintext highlighter-rouge">.</code>) syntax for accessing a field of an object.</p>
+
+<h3 id="accessing-nonexistent-fields-and-undefined">Accessing Nonexistent Fields and <code class="language-plaintext highlighter-rouge">undefined</code></h3>
+
+<p>If you access a nonexistent field of an object, then you get back the special value <code class="language-plaintext highlighter-rouge">undefined</code>.
+This is shown in the snippet below.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;</span> <span class="kd">let</span> <span class="nx">obj</span> <span class="o">=</span> <span class="p">{</span> <span class="dl">'</span><span class="s1">foo</span><span class="dl">'</span><span class="p">:</span> <span class="mi">1</span> <span class="p">}</span>
+<span class="kc">undefined</span>
+<span class="o">&gt;</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">foo</span>
+<span class="mi">1</span>
+<span class="o">&gt;</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">bar</span>
+<span class="kc">undefined</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">undefined</code> itself is a null-like value; it doesn’t have any real special meaning by itself, and it just sort of exists.
+Note that JavaScript also has <code class="language-plaintext highlighter-rouge">null</code>, so JavaScript has basically <em>two different</em> null-like values: <code class="language-plaintext highlighter-rouge">undefined</code> and <code class="language-plaintext highlighter-rouge">null</code>.
+In context, <code class="language-plaintext highlighter-rouge">undefined</code> is usually to indicate that something weird happened in a way that’s built into JavaScript itself, as with accessing a nonexistent field of an object above.
+<code class="language-plaintext highlighter-rouge">null</code> is usually intended to indicate something weird directly in application code, as one might normally use <code class="language-plaintext highlighter-rouge">null</code> in another language.</p>
+
+<h3 id="dynamically-adding-or-removing-fields">Dynamically Adding or Removing Fields</h3>
+
+<p>We can dynamically add fields to an object in JavaScript.
+For example, consider the following code:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;</span> <span class="kd">let</span> <span class="nx">obj</span> <span class="o">=</span> <span class="p">{</span> <span class="dl">'</span><span class="s1">foo</span><span class="dl">'</span><span class="p">:</span> <span class="mi">1</span> <span class="p">}</span>
+<span class="kc">undefined</span>
+<span class="o">&gt;</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">foo</span>
+<span class="mi">1</span>
+<span class="o">&gt;</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">bar</span>
+<span class="kc">undefined</span>
+<span class="o">&gt;</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">bar</span> <span class="o">=</span> <span class="kc">false</span>
+<span class="kc">false</span>
+<span class="o">&gt;</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">bar</span>
+<span class="kc">false</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">obj</code> initially has no <code class="language-plaintext highlighter-rouge">bar</code> field, so accessing it gives us back the special value <code class="language-plaintext highlighter-rouge">undefined</code>.
+However, we later add a <code class="language-plaintext highlighter-rouge">bar</code> field, with the line <code class="language-plaintext highlighter-rouge">obj.bar = false</code>, and subsequently see that we can now access <code class="language-plaintext highlighter-rouge">obj.bar</code>.
+Note that, as simple as this looks, this is something we fundamentally <em>cannot</em> do in Java or C++: we’ve effectively dynamically added an instance variable to an object.</p>
+
+<p>We can similarly dynamically remove a field from an object using <code class="language-plaintext highlighter-rouge">delete</code>, as shown below:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;</span> <span class="kd">let</span> <span class="nx">obj</span> <span class="o">=</span> <span class="p">{</span> <span class="dl">'</span><span class="s1">foo</span><span class="dl">'</span><span class="p">:</span> <span class="mi">1</span> <span class="p">}</span>
+<span class="kc">undefined</span>
+<span class="o">&gt;</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">foo</span>
+<span class="mi">1</span>
+<span class="o">&gt;</span> <span class="k">delete</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">foo</span>
+<span class="kc">true</span>
+<span class="o">&gt;</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">foo</span>
+<span class="kc">undefined</span>
+</code></pre></div></div>
+
+<p>The object above initially has a <code class="language-plaintext highlighter-rouge">foo</code> field, but we later remove it.
+Subsequent accesses to <code class="language-plaintext highlighter-rouge">foo</code> give us back <code class="language-plaintext highlighter-rouge">undefined</code>, as we’re now accessing a field that no longer exists.
+Once again, this is something that fundamentally cannot be done with Java or C++: we are directly removing an instance variable from an object.</p>
+
+<h2 id="constructors">Constructors</h2>
+
+<p>While we can directly construct objects using object-literal notation, oftentimes we want to create a lot of objects that have similar fields to each other.
+In class-based OO, we might make a class for this purpose, serving as a template for all our objects.
+In JavaScript, this same problem is instead solved with <em>constructors</em>.
+For example, the code below defines a <code class="language-plaintext highlighter-rouge">Rectangle</code> constructor, and then creates two rectanges, each with their own separate <code class="language-plaintext highlighter-rouge">width</code> and <code class="language-plaintext highlighter-rouge">height</code>:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">Rectangle</span><span class="p">(</span><span class="nx">inputWidth</span><span class="p">,</span> <span class="nx">inputHeight</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">width</span> <span class="o">=</span> <span class="nx">inputWidth</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">height</span> <span class="o">=</span> <span class="nx">inputHeight</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="o">&gt;</span> <span class="kd">let</span> <span class="nx">r1</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Rectangle</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="kc">undefined</span>
+<span class="o">&gt;</span> <span class="kd">let</span> <span class="nx">r2</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Rectangle</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+<span class="kc">undefined</span>
+<span class="o">&gt;</span> <span class="nx">r1</span><span class="p">.</span><span class="nx">width</span>
+<span class="mi">3</span>
+<span class="o">&gt;</span> <span class="nx">r2</span><span class="p">.</span><span class="nx">height</span>
+<span class="mi">6</span>
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">Rectangle</code> constructor itself is just a function; from JavaScript’s standpoint, there is no special distrinction between regular old functions and constructors.
+From a programmer’s standpoint, constructors usually start with a capital letter, whereas regular functions usually start with a lowercase letter.</p>
+
+<p>In the code above, we call the constructor using <code class="language-plaintext highlighter-rouge">new</code>, instead of performing a regular function call.
+<code class="language-plaintext highlighter-rouge">new</code> is specifically used for calling a function as a constructor, and it has the following semantics:</p>
+
+<ul>
+  <li>First create a new, empty object</li>
+  <li>Bind a reference to this newly-created object to the built-in variable <code class="language-plaintext highlighter-rouge">this</code></li>
+  <li>Start executing the called constructor, as if it were a normal function</li>
+  <li>Once the function finishes, <code class="language-plaintext highlighter-rouge">new</code> returns a reference to the newly-created object, irrespective of what the function returns (if anything).
+Constructors don’t normally explicitly return anything anyway, but even if they did, this return value is ignored.</li>
+</ul>
+
+<p>Because a new object is created first and bound to <code class="language-plaintext highlighter-rouge">this</code>, the above code ends up dynamically adding the <code class="language-plaintext highlighter-rouge">width</code> and <code class="language-plaintext highlighter-rouge">height</code> fields to the newly-created object.
+Furthermore, because <code class="language-plaintext highlighter-rouge">Rectangle</code> is being called as a function, the parameters to the call are bound to the variables <code class="language-plaintext highlighter-rouge">inputWidth</code> and <code class="language-plaintext highlighter-rouge">inputHeight</code>.</p>
+
+<h2 id="inheritance">Inheritance</h2>
+
+<p>Objects can inherit directly from other objects.
+Each object has a somewhat special field called <code class="language-plaintext highlighter-rouge">__proto__</code>, which refers to an object’s <em>prototype</em>.
+<code class="language-plaintext highlighter-rouge">__proto__</code> is used whenever an attempt is made to access a field which doesn’t exist.
+To show how this works, let’s consider the following access: <code class="language-plaintext highlighter-rouge">obj.myField</code>.
+JavaScript executes the following algorithm for this access:</p>
+
+<ol>
+  <li>See if <code class="language-plaintext highlighter-rouge">obj</code> contains field <code class="language-plaintext highlighter-rouge">myField</code>.
+If it does, then return whatever value is associated with <code class="language-plaintext highlighter-rouge">myField</code>.</li>
+  <li>If <code class="language-plaintext highlighter-rouge">obj</code> does not contain the <code class="language-plaintext highlighter-rouge">myField</code> field, look instead at the <code class="language-plaintext highlighter-rouge">__proto__</code> field of <code class="language-plaintext highlighter-rouge">obj</code>.
+If <code class="language-plaintext highlighter-rouge">__proto__</code> itself is a reference to an object, <em>recursively</em> do this lookup procedure of <code class="language-plaintext highlighter-rouge">myField</code>, but instead starting from the object <code class="language-plaintext highlighter-rouge">__proto__</code> refers to instead of <code class="language-plaintext highlighter-rouge">obj</code>.</li>
+  <li>If <code class="language-plaintext highlighter-rouge">obj</code> does not contain the <code class="language-plaintext highlighter-rouge">myField</code> field, <em>and</em> <code class="language-plaintext highlighter-rouge">obj.__proto__</code> isn’t an object, then return <code class="language-plaintext highlighter-rouge">undefined</code>.</li>
+</ol>
+
+<p>An example follows:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;</span> <span class="kd">let</span> <span class="nx">obj1</span> <span class="o">=</span> <span class="p">{</span> <span class="dl">'</span><span class="s1">foo</span><span class="dl">'</span><span class="p">:</span> <span class="mi">1</span> <span class="p">}</span>
+<span class="kc">undefined</span>
+<span class="o">&gt;</span> <span class="kd">let</span> <span class="nx">obj2</span> <span class="o">=</span> <span class="p">{</span> <span class="dl">'</span><span class="s1">bar</span><span class="dl">'</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="dl">'</span><span class="s1">__proto__</span><span class="dl">'</span><span class="p">:</span> <span class="nx">obj1</span> <span class="p">}</span>
+<span class="kc">undefined</span>
+<span class="o">&gt;</span> <span class="nx">obj2</span><span class="p">.</span><span class="nx">bar</span>
+<span class="mi">2</span>
+<span class="o">&gt;</span> <span class="nx">obj2</span><span class="p">.</span><span class="nx">foo</span>
+<span class="mi">1</span>
+<span class="o">&gt;</span> <span class="nx">obj2</span><span class="p">.</span><span class="nx">blah</span>
+<span class="kc">undefined</span>
+</code></pre></div></div>
+
+<p>As shown, <code class="language-plaintext highlighter-rouge">obj2</code> is given a <code class="language-plaintext highlighter-rouge">__proto__</code> field which refers to the previously-created object <code class="language-plaintext highlighter-rouge">obj1</code>.
+<code class="language-plaintext highlighter-rouge">obj1</code> itself has a <code class="language-plaintext highlighter-rouge">foo</code> field.
+With the access <code class="language-plaintext highlighter-rouge">obj2.bar</code>, this immediately returns <code class="language-plaintext highlighter-rouge">2</code>, because <code class="language-plaintext highlighter-rouge">obj2</code> directly has a <code class="language-plaintext highlighter-rouge">bar</code> field.
+However, with the access <code class="language-plaintext highlighter-rouge">obj2.foo</code>, this gets more interesting.
+<code class="language-plaintext highlighter-rouge">obj2</code> does <em>not</em> have a <code class="language-plaintext highlighter-rouge">foo</code> field, but it <em>does</em> have a <code class="language-plaintext highlighter-rouge">__proto__</code> field which refers to an object.
+As such, this lookup procedure for <code class="language-plaintext highlighter-rouge">foo</code> is repeated for the object <code class="language-plaintext highlighter-rouge">__proto__</code> refers to, specifically <code class="language-plaintext highlighter-rouge">obj1</code>.
+In other words, this effectively becomes <code class="language-plaintext highlighter-rouge">obj1.foo</code>.
+<code class="language-plaintext highlighter-rouge">obj1</code> does, in fact, have a <code class="language-plaintext highlighter-rouge">foo</code> field, so this lookup ultimately returns <code class="language-plaintext highlighter-rouge">1</code>.
+In this manner, <code class="language-plaintext highlighter-rouge">obj2</code> is said to inherit from <code class="language-plaintext highlighter-rouge">obj1</code>: while <code class="language-plaintext highlighter-rouge">obj2</code> itself doesn’t have a <code class="language-plaintext highlighter-rouge">foo</code> field directly, we can still access a <code class="language-plaintext highlighter-rouge">foo</code> field from it, because its parent <code class="language-plaintext highlighter-rouge">obj1</code> has a <code class="language-plaintext highlighter-rouge">foo</code> field.</p>
+
+<p>As for the last access of <code class="language-plaintext highlighter-rouge">obj2.blah</code>, since <code class="language-plaintext highlighter-rouge">obj2</code> itself doesn’t have a <code class="language-plaintext highlighter-rouge">blah</code> field, the lookup consults the <code class="language-plaintext highlighter-rouge">__proto__</code> field instead.
+This effectively becomes <code class="language-plaintext highlighter-rouge">obj1.blah</code> as a result.
+However, <code class="language-plaintext highlighter-rouge">obj1</code> also lacks a <code class="language-plaintext highlighter-rouge">blah</code> field, and it doesn’t have a <code class="language-plaintext highlighter-rouge">__proto__</code> field either, so this returns <code class="language-plaintext highlighter-rouge">undefined</code>.</p>
+
+<p>Since this lookup approach is based on looking at the <code class="language-plaintext highlighter-rouge">__proto__</code> field, and because the <code class="language-plaintext highlighter-rouge">__proto__</code> field itself is just another field, we can <em>dynamically</em> change what an object inherits from.
+This is shown in the example below:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;</span> <span class="kd">let</span> <span class="nx">base1</span> <span class="o">=</span> <span class="p">{</span> <span class="dl">'</span><span class="s1">foo</span><span class="dl">'</span><span class="p">:</span> <span class="mi">1</span> <span class="p">}</span>
+<span class="kc">undefined</span>
+<span class="o">&gt;</span> <span class="kd">let</span> <span class="nx">base2</span> <span class="o">=</span> <span class="p">{</span> <span class="dl">'</span><span class="s1">bar</span><span class="dl">'</span><span class="p">:</span> <span class="mi">2</span> <span class="p">}</span>
+<span class="kc">undefined</span>
+<span class="o">&gt;</span> <span class="kd">let</span> <span class="nx">obj</span> <span class="o">=</span> <span class="p">{</span> <span class="dl">'</span><span class="s1">baz</span><span class="dl">'</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="dl">'</span><span class="s1">__proto__</span><span class="dl">'</span><span class="p">:</span> <span class="nx">base1</span> <span class="p">}</span>
+<span class="kc">undefined</span>
+<span class="o">&gt;</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">foo</span>
+<span class="mi">1</span>
+<span class="o">&gt;</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">bar</span>
+<span class="kc">undefined</span>
+<span class="o">&gt;</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">__proto__</span> <span class="o">=</span> <span class="nx">base2</span>
+<span class="p">{</span> <span class="nl">bar</span><span class="p">:</span> <span class="mi">2</span> <span class="p">}</span>
+<span class="o">&gt;</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">foo</span>
+<span class="kc">undefined</span>
+<span class="o">&gt;</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">bar</span>
+<span class="mi">2</span>
+</code></pre></div></div>
+
+<p>As shown above, <code class="language-plaintext highlighter-rouge">obj</code> initially inherits from <code class="language-plaintext highlighter-rouge">base1</code>; i.e., <code class="language-plaintext highlighter-rouge">obj</code>’s <code class="language-plaintext highlighter-rouge">__proto__</code> field initially refers to <code class="language-plaintext highlighter-rouge">base1</code>.
+As such, it appears to have a <code class="language-plaintext highlighter-rouge">foo</code> field with the later access to <code class="language-plaintext highlighter-rouge">obj.foo</code>, which returns <code class="language-plaintext highlighter-rouge">1</code>.
+<code class="language-plaintext highlighter-rouge">foo</code> is coming from <code class="language-plaintext highlighter-rouge">base1</code> here.
+Then, we update <code class="language-plaintext highlighter-rouge">obj</code>’s <code class="language-plaintext highlighter-rouge">__proto__</code> field to instead refer to <code class="language-plaintext highlighter-rouge">base2</code>; i.e., we make <code class="language-plaintext highlighter-rouge">obj</code> inherit from <code class="language-plaintext highlighter-rouge">base2</code> instead.
+Suddenly, <code class="language-plaintext highlighter-rouge">obj.foo</code> returns undefined, because <code class="language-plaintext highlighter-rouge">obj</code> itself lacks <code class="language-plaintext highlighter-rouge">foo</code>, as does <code class="language-plaintext highlighter-rouge">base2</code>.
+However, <code class="language-plaintext highlighter-rouge">obj.bar</code> suddently returns <code class="language-plaintext highlighter-rouge">2</code>, because <code class="language-plaintext highlighter-rouge">obj</code> inherits <code class="language-plaintext highlighter-rouge">bar</code> from <code class="language-plaintext highlighter-rouge">base2</code>.</p>
+
+<h3 id="caveat-slight-oversimplification-and-non-idiomatic-behaviors">Caveat: Slight Oversimplification and Non-Idiomatic Behaviors</h3>
+
+<p>For the purposes of this class, you don’t need to dig any deeper here.
+However, beyond the class, you should be aware that <code class="language-plaintext highlighter-rouge">obj1</code> above does, in fact, have a <code class="language-plaintext highlighter-rouge">__proto__</code> field, even though we never directly accessed it.
+This does, in fact, point to another object, which effectively acts as the ultimate parent of all objects in JavaScript.
+This sort of base object itself doesn’t have a <code class="language-plaintext highlighter-rouge">blah</code> field, so <code class="language-plaintext highlighter-rouge">undefined</code> is still ultimately returned.
+We won’t be using this sort of base object at all in this class, so you don’t need to worry about it.</p>
+
+<p>One other thing: the direct access of <code class="language-plaintext highlighter-rouge">__proto__</code> is not considered good practice.
+Because this can radically change behavior so easily, it’s usually discouraged.
+Additionally, it’s arguably not standards compliant, despite being nearly universally supported.
+Direct access also usually has negative performance implications, because it can make the JavaScript engine (the thing executing your JavaScript code) encounter difficulty during optimizations.</p>
+
+<p>For our purposes, my goal here is merely to teach how inheritance works in JavaScript, not best practices for setting up inheritance.
+The best practices still require you to know all this material, but strictly add further complications.
+As such, this is still a suitable foundation for understanding these concepts.</p>
+
+<h2 id="methods">Methods</h2>
+
+<p>Methods can be placed directly on objects.
+Like constructors, methods the distinction between a method and a function is merely a matter of perspective to JavaScript.
+An example showing methods is below, building off of our <code class="language-plaintext highlighter-rouge">Rectangle</code> example:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">Rectangle</span><span class="p">(</span><span class="nx">inputWidth</span><span class="p">,</span> <span class="nx">inputHeight</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">width</span> <span class="o">=</span> <span class="nx">inputWidth</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">height</span> <span class="o">=</span> <span class="nx">inputHeight</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">getArea</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">width</span> <span class="o">*</span> <span class="k">this</span><span class="p">.</span><span class="nx">height</span><span class="p">;</span>
+    <span class="p">};</span>
+<span class="p">}</span>
+
+<span class="o">&gt;</span> <span class="kd">let</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Rectangle</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="kc">undefined</span>
+<span class="o">&gt;</span> <span class="nx">r</span><span class="p">.</span><span class="nx">getArea</span><span class="p">()</span>
+<span class="mi">12</span>
+</code></pre></div></div>
+
+<p>As before, <code class="language-plaintext highlighter-rouge">Rectangle</code> is a constructor that adds the <code class="language-plaintext highlighter-rouge">width</code> and <code class="language-plaintext highlighter-rouge">height</code> fields to a newly-created object.
+In addition, this version also adds a <code class="language-plaintext highlighter-rouge">getArea</code> field to the newly-created object.
+<code class="language-plaintext highlighter-rouge">getArea</code> itself holds a function, specifically an <a href="https://en.wikipedia.org/wiki/Anonymous_function">anonymous function</a> (i.e., it has no name).
+The function itself uses <code class="language-plaintext highlighter-rouge">this.width</code> and <code class="language-plaintext highlighter-rouge">this.height</code> internally; more on that in a bit.</p>
+
+<p>Let’s look at the method call performed here, specifically <code class="language-plaintext highlighter-rouge">r.getArea()</code>.
+Internally, this does two things:</p>
+
+<ol>
+  <li>This does a lookup of <code class="language-plaintext highlighter-rouge">r.getArea</code>, using the same algorithm as before.</li>
+  <li>This will call the result of <code class="language-plaintext highlighter-rouge">r.getArea</code>
+If the result of <code class="language-plaintext highlighter-rouge">r.getArea</code> is not a function, then an exception is thrown.
+Otherwise, <code class="language-plaintext highlighter-rouge">this</code> will be bound to whatever the object is we are calling it on, specifically <code class="language-plaintext highlighter-rouge">r</code> in this case.</li>
+</ol>
+
+<p>Since <code class="language-plaintext highlighter-rouge">this</code> is bound to <code class="language-plaintext highlighter-rouge">r</code> during the call to <code class="language-plaintext highlighter-rouge">r.getArea</code> above, we can access <code class="language-plaintext highlighter-rouge">r</code>’s <code class="language-plaintext highlighter-rouge">width</code> and <code class="language-plaintext highlighter-rouge">height</code> fields with <code class="language-plaintext highlighter-rouge">this.width</code> and <code class="language-plaintext highlighter-rouge">this.height</code> in the body of the <code class="language-plaintext highlighter-rouge">getArea</code> method.
+The only reason we know that <code class="language-plaintext highlighter-rouge">getArea</code> is a method at all, as opposed to any old anonymous function, is specifically because of the way we are calling it: <code class="language-plaintext highlighter-rouge">r.getArea()</code>.
+If we instead did:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">let</span> <span class="nx">r2</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Rectangle</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+<span class="kd">let</span> <span class="nx">temp</span> <span class="o">=</span> <span class="nx">r2</span><span class="p">.</span><span class="nx">getArea</span> <span class="c1">// note: no parentheses</span>
+                      <span class="c1">// this isn't a call, just an access</span>
+<span class="nx">temp</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>…the above code wouldn’t work the same way.
+We still end up calling the same function defined before, but <code class="language-plaintext highlighter-rouge">this</code> would crucially no longer be bound to <code class="language-plaintext highlighter-rouge">r2</code>.
+<code class="language-plaintext highlighter-rouge">this</code> would instead be bound to a sort of default object sometimes called the <a href="https://javascript.info/global-object">global object</a>.
+As such, this code wouldn’t do what we wanted.</p>
+
+<h2 id="inheritance-with-constructors">Inheritance with Constructors</h2>
+
+<p>In the prior example, we added a <code class="language-plaintext highlighter-rouge">getArea</code> method to <code class="language-plaintext highlighter-rouge">Rectangle</code> objects.
+However, this is usually not a great way to add such methods.
+To understand why, think for a moment about what exactly gets allocated each time we execute the <code class="language-plaintext highlighter-rouge">Rectangle</code> constructor, which is duplicated below for convenience:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">Rectangle</span><span class="p">(</span><span class="nx">inputWidth</span><span class="p">,</span> <span class="nx">inputHeight</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">width</span> <span class="o">=</span> <span class="nx">inputWidth</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">height</span> <span class="o">=</span> <span class="nx">inputHeight</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">getArea</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">width</span> <span class="o">*</span> <span class="k">this</span><span class="p">.</span><span class="nx">height</span><span class="p">;</span>
+    <span class="p">};</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>If we execute <code class="language-plaintext highlighter-rouge">new Rectangle(1, 2)</code>, we will allocate:</p>
+
+<ul>
+  <li>Space for a new, empty object</li>
+  <li>Space for the <code class="language-plaintext highlighter-rouge">width</code> field of the new object</li>
+  <li>Space for the <code class="language-plaintext highlighter-rouge">width</code> value of the new object</li>
+  <li>Space for the <code class="language-plaintext highlighter-rouge">height</code> field of the new object</li>
+  <li>Space for the <code class="language-plaintext highlighter-rouge">height</code> value of the new object</li>
+  <li>Space for the <code class="language-plaintext highlighter-rouge">getArea</code> field of the new object</li>
+  <li>Space for the <code class="language-plaintext highlighter-rouge">getArea</code> value of the new object, specifically the function</li>
+</ul>
+
+<p>Since each <code class="language-plaintext highlighter-rouge">Rectangle</code> is expected to have its own <code class="language-plaintext highlighter-rouge">width</code> and <code class="language-plaintext highlighter-rouge">height</code>, it’s unavoidable to need to allocate space for these components.
+However, <code class="language-plaintext highlighter-rouge">getArea</code> is another story.
+<em>All</em> <code class="language-plaintext highlighter-rouge">Rectangle</code>’s share the same <code class="language-plaintext highlighter-rouge">getArea</code> method.
+However, currently, each one allocates its own separate memory for the <code class="language-plaintext highlighter-rouge">getArea</code> field, and similarly each allocates its own space for a separate copy of the <code class="language-plaintext highlighter-rouge">getArea</code> method itself (the anonymous function).
+As such, if we start making lots of <code class="language-plaintext highlighter-rouge">Rectangle</code>s, we’ll end up duplicating the same memory over and over again, wasting space.</p>
+
+<p>For this reason, methods are most commonly implemented through prototype-based inheritance instead.
+Using the techniques shown so far, we could do this like so:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">let</span> <span class="nx">getAreaMethod</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">width</span> <span class="o">*</span> <span class="k">this</span><span class="p">.</span><span class="nx">height</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kd">let</span> <span class="nx">rectanglePrototype</span> <span class="o">=</span> <span class="p">{</span> <span class="dl">'</span><span class="s1">getArea</span><span class="dl">'</span><span class="p">:</span> <span class="nx">getAreaMethod</span> <span class="p">};</span>
+
+<span class="kd">function</span> <span class="nx">Rectangle</span><span class="p">(</span><span class="nx">inputWidth</span><span class="p">,</span> <span class="nx">inputHeight</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">width</span> <span class="o">=</span> <span class="nx">inputWidth</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">height</span> <span class="o">=</span> <span class="nx">inputHeight</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">__proto__</span> <span class="o">=</span> <span class="nx">rectanglePrototype</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>This sets up a prototype for all <code class="language-plaintext highlighter-rouge">Rectangle</code> objects, and initializes the <code class="language-plaintext highlighter-rouge">__proto__</code> field of each <code class="language-plaintext highlighter-rouge">Rectangle</code> to refer to this prototype.
+This way, the <code class="language-plaintext highlighter-rouge">getArea</code> field is only allocated once (specifically in the prototype), and similarly the <code class="language-plaintext highlighter-rouge">getArea</code> method itself is only allocated once.
+Now all <code class="language-plaintext highlighter-rouge">Rectangle</code> objects effectively share the same field and method, thanks to the prototype.</p>
+
+<p>However, while we’re saving memory, the code above admittedly is bulkier than before.
+Additionally, we’re directly manipulating the <code class="language-plaintext highlighter-rouge">__proto__</code> field, which isn’t considered good practice.
+It turns out that JavaScript has a shorthand way of doing the same thing, shown below:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">Rectangle</span><span class="p">(</span><span class="nx">inputWidth</span><span class="p">,</span> <span class="nx">inputHeight</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">width</span> <span class="o">=</span> <span class="nx">inputWidth</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">height</span> <span class="o">=</span> <span class="nx">inputHeight</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nx">Rectangle</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">getArea</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">width</span> <span class="o">*</span> <span class="k">this</span><span class="p">.</span><span class="nx">height</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>It might not look like it, but the above code sets up <code class="language-plaintext highlighter-rouge">Rectangle</code>’s prototype exactly as before.
+To understand what this code is doing, we need two short tangents.</p>
+
+<h3 id="tangent-1-named-functions-are-not-special">Tangent 1: Named Functions Are Not Special</h3>
+
+<p>First of all, named functions in JavaScript aren’t that much different than anonymous functions.
+When we do:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">add</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">x</span> <span class="o">+</span> <span class="nx">y</span><span class="p">;</span> <span class="p">}</span>
+</code></pre></div></div>
+
+<p>…this is basically equivalent to saying:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">let</span> <span class="nx">add</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">x</span> <span class="o">+</span> <span class="nx">y</span><span class="p">;</span> <span class="p">}</span>
+</code></pre></div></div>
+
+<p>That is, we introduce a new variable with the name of the function, and bind it to a new anonymous function that does whatever the body of the function does.
+As such, our prior <code class="language-plaintext highlighter-rouge">Rectangle</code> definition is equivalent to:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">let</span> <span class="nx">Rectangle</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">inputWidth</span><span class="p">,</span> <span class="nx">inputHeight</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">width</span> <span class="o">=</span> <span class="nx">inputWidth</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">height</span> <span class="o">=</span> <span class="nx">inputHeight</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="tangent-2-functions-are-also-objects">Tangent 2: Functions are Also Objects</h3>
+
+<p>Second of all, JavaScript functions are <em>also</em> objects.
+As such, functions can have their own fields, and these fields can have values.
+Lookup on these fields works exactly as it does on other objects.</p>
+
+<p>When you create a function in JavaScript, it automatically is given a field named <code class="language-plaintext highlighter-rouge">prototype</code>.
+Note that <code class="language-plaintext highlighter-rouge">prototype</code> is <em>not</em> the same field as <code class="language-plaintext highlighter-rouge">__proto__</code>.
+The <code class="language-plaintext highlighter-rouge">prototype</code> field is then initialized to an empty object.
+All of this happens transparently when functions are created.</p>
+
+<h3 id="putting-it-all-together">Putting it All Together</h3>
+
+<p>With this all in mind, let’s revisit the original code, duplicated below for convenience:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">Rectangle</span><span class="p">(</span><span class="nx">inputWidth</span><span class="p">,</span> <span class="nx">inputHeight</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">width</span> <span class="o">=</span> <span class="nx">inputWidth</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">height</span> <span class="o">=</span> <span class="nx">inputHeight</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nx">Rectangle</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">getArea</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">width</span> <span class="o">*</span> <span class="k">this</span><span class="p">.</span><span class="nx">height</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">Rectangle</code> constructor itself should make complete sense by this point, though the line after it (starting with <code class="language-plaintext highlighter-rouge">Rectangle.prototype</code>) might look odd.
+With the prior explanation in mind, this subsequent line is adding a <code class="language-plaintext highlighter-rouge">getArea</code> field to the (previously empty) object referred to by <code class="language-plaintext highlighter-rouge">Rectangle.prototype</code>.
+This <code class="language-plaintext highlighter-rouge">getArea</code> field is initialized with an anonymous function which will ultimately return the area.</p>
+
+<p>Now let’s say we create a new <code class="language-plaintext highlighter-rouge">Rectangle</code> object, as with <code class="language-plaintext highlighter-rouge">new Rectangle(1, 2)</code>.
+This will go through the usual process of running through a constructor.
+However, one additional step occurs that was previously elided: the <code class="language-plaintext highlighter-rouge">__proto__</code> field of the newly-constructed <code class="language-plaintext highlighter-rouge">Rectangle</code> object is <em>automatically</em> set to refer to the object that <code class="language-plaintext highlighter-rouge">Rectangle.prototype</code> refers to.
+In other words, the above code is equivalent to:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">Rectangle</span><span class="p">(</span><span class="nx">inputWidth</span><span class="p">,</span> <span class="nx">inputHeight</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">__proto__</span> <span class="o">=</span> <span class="nx">Rectangle</span><span class="p">.</span><span class="nx">prototype</span><span class="p">;</span> <span class="c1">// added line</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">width</span> <span class="o">=</span> <span class="nx">inputWidth</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">height</span> <span class="o">=</span> <span class="nx">inputHeight</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nx">Rectangle</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">getArea</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">width</span> <span class="o">*</span> <span class="k">this</span><span class="p">.</span><span class="nx">height</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>…but we don’t need to (and shouldn’t) write the <code class="language-plaintext highlighter-rouge">this.__proto__ = Rectangle.prototype</code> line.
+This just happens automatically when we use the constructor.
+This helps keep the code clean, and the use of prototypes in this matter is so common that it makes sense to have a special shorthand for this.</p>
+
+<h2 id="comparison-to-class-based-inheritance">Comparison to Class-Based Inheritance</h2>
+
+<p>We’ll end this discussion with a comparison to class-based inheritance, with special emphasis on Java and C++.
+With class-based inheritance, we must define classes which serve as templates from which to make objects.
+Classes can inherit from each other, allowing for reuse.
+Usually, class-based inheritance requires us to have special syntax for a variety of situations, for instance:</p>
+
+<ul>
+  <li>Instance variables and methods usually are defined with different syntax</li>
+  <li>We need special syntax to denote a class</li>
+  <li>We need special syntax to denote inheritance</li>
+  <li>We might need special syntax to denote overriding (<code class="language-plaintext highlighter-rouge">virtual</code> is mandatory in C++, and <code class="language-plaintext highlighter-rouge">@Override</code> is optional but preferred in Java)</li>
+</ul>
+
+<p>However, JavaScript instead ops for a much simpler, and ironically much more flexible model.
+Instance variables and methods are declared using the same syntax; these are just fields on an object.
+Because we only have objects, no classes, we don’t need special syntax for talking about classes.
+Inheritance requires us to understand that the <code class="language-plaintext highlighter-rouge">__proto__</code> and <code class="language-plaintext highlighter-rouge">prototype</code> fields are a little bit special, but we don’t need special syntax to use them; it’s just setting fields of an object.
+Overriding is merely a matter of setting <code class="language-plaintext highlighter-rouge">__proto__</code> to the particular object you want; this doesn’t need special syntax, and hardly even a special term.
+Perhaps most of all, since everything is determined through the fields of objects, this allows us to do much more at runtime: we can dynamically add and remove both instance variables and methods, and we can even change inheritance hierarchies, and even do so only for specific objects if we so chose; almost everything boils down to setting the fields of an object to the right values.</p>
+
+<p>All that said, this still has some issues.
+For one, just because there is far less syntax, the programmer nonetheless needs to be <em>aware</em> of these things.
+Having special syntax has an advantage of making it immediately obvious that you’re doing something special, so less syntax isn’t always better.
+Additionally, having lots of flexibility is a double-edged sword: if your code can do more things, it means there are more ways in which your code can do things incorrectly.
+For example, while we <em>can</em> modify <code class="language-plaintext highlighter-rouge">__proto__</code> as much as we want, this is generally considered very poor practice; programs that modify <code class="language-plaintext highlighter-rouge">__proto__</code> are inherently more difficult to understand than programs that leave it alone, and only use the <code class="language-plaintext highlighter-rouge">prototype</code> mechanism on constructors.</p>
+
+
+      
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/4.1.0/anchor.min.js" integrity="sha256-lZaRhKri35AyJSypXXs4o6OPFTbTmUoltBbDCbdzegg=" crossorigin="anonymous"></script>
+    <script>anchors.add();</script>
+  </body>
+</html>
